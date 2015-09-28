@@ -1,20 +1,12 @@
 var express = require('express');
+var bodyParser = require('body-parser');
+
 var app = express();
 var PORT = process.env.PORT || 3000;
-var todos = [{
-    id: 1,
-    description: 'Meet mom for lunch',
-    completed: false
+var todos = [];
+var todoNextId = 1;
 
-}, {
-    id: 2,
-    description: 'Go to market',
-    completed: false
-}, {
-    id: 3,
-    description: 'Wash car',
-    completed: false
-}];
+app.use(bodyParser.json());
 
 
 app.get('/', function (req, res){
@@ -24,7 +16,7 @@ app.get('/', function (req, res){
 // GET /todos
 app.get('/todos', function(req, res){
     res.json(todos);
-})
+});
 
 app.get('/todos/:id', function(req, res){
     var todoId = parseInt(req.params.id, 10),
@@ -33,17 +25,30 @@ app.get('/todos/:id', function(req, res){
     todos.forEach(function(item){
         if(item.id === todoId)
             ret = item;
-    })
+    });
 
-    //console.log('ret = ' + ret);
+    console.log('ret = ' + ret);
 
     if(typeof ret !== 'undefined')
         res.json(ret)
     else
         res.send('Not found: ID = ' + todoId);
 });
-// GET /todos/:id
+
+// POST /todos
+app.post('/todos', function(req, res){
+    var body = req.body;
+
+    body.id = todoNextId;
+    todos.push(body);
+    todoNextId += 1;
+
+    console.log(todos);
+
+    res.json(todos[todos.length -1]);
+});
+
 
 app.listen(PORT, function(){
     console.log('Express listening on port ' + PORT);
-})
+});
