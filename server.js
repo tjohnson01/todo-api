@@ -9,7 +9,6 @@ var todoNextId = 1;
 
 app.use(bodyParser.json());
 
-
 app.get('/', function (req, res){
     res.send('Todo API Root');
 });
@@ -33,13 +32,6 @@ app.get('/todos/:id', function(req, res){
 app.post('/todos', function(req, res){
     var body = _.pick(req.body, 'completed', 'description'); // use _.pick to only pick description
 
-
-
-    console.log(!_.isBoolean(body.completed));
-    console.log(_.isString(body.description));
-    console.log(body.description.trim().length === 0);
-
-
     if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
         return res.status(400).send();
     }
@@ -49,6 +41,21 @@ app.post('/todos', function(req, res){
     todos.push(body);
 
     res.json(body);
+});
+
+// DELETE /todos/:id
+app.delete('/todos/:id', function(req, res){
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    if(!matchedTodo)
+        res.status(404).json({"error": "no todo found with that ID"});
+    else{
+        //remove element from array
+        todos = _.without(todos, matchedTodo);
+        res.json(todos);
+    }
+
 });
 
 
