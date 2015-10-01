@@ -35,13 +35,23 @@ app.get('/todos', function(req, res){
 });
 
 app.get('/todos/:id', function(req, res){
-    var todoId = parseInt(req.params.id, 10),
-        matchedTodo = _.findWhere(todos, {id: todoId});
+    var todoId = parseInt(req.params.id, 10);
 
-    if(typeof matchedTodo !== 'undefined')
-        res.json(matchedTodo);
-    else
-        res.send('Not found: ID = ' + todoId);
+    db.todo.findById(todoId).then(function(t) {
+        if (t) {
+            res.json(t.toJSON());
+        } else {
+            res.status(404).json("No todo found");
+        }
+
+        //throw new Error('test');
+    }).catch(function(e) {
+        console.log("Error caught: " + e);
+        res.status(500).send();
+    });
+
+    //Or you could do success, reject
+
 });
 
 // POST /todos
@@ -54,27 +64,6 @@ app.post('/todos', function(req, res){
         res.status(400).json(e);
     });
 
-
-
-
-    // if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
-    //     return res.status(400).send();
-    // }
-
-
-// db.todo.create 
-//   respond with 200 and todo
-//     -otherwise
-//   res.status(400).json(e);
-//
-//
-
-
-    // body.id = todoNextId++;
-    // body.description = body.description.trim();
-    // todos.push(body);
-
-    // res.json(body);
 });
 
 // DELETE /todos/:id
