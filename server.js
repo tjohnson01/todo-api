@@ -16,22 +16,50 @@ app.get('/', function (req, res){
 
 // GET /todos
 app.get('/todos', function(req, res){
-    var queryParams = req.query;
-    var filteredTodos = todos;
+    var query = req.query;
+    var where = {};
 
-    if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
-        filteredTodos = _.where(filteredTodos, {completed: true});
-    } else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
-        filteredTodos = _.where(filteredTodos, {completed: false});
+    //filter 
+    if(query.hasOwnProperty('completed') && (query.completed === 'true' || query.completed === 'false')){
+        where.completed = (query.completed === 'true');
+    } //else{
+      //  res.status(400).json('Missing completed property');
+    //}
+
+    console.log(query.completed === 'true' || query.complted === 'false');
+    if(query.hasOwnProperty('q') && query.q.trim().length > 0){
+        where.description = query.q.trim();
     }
 
-    if(queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0){
-        filteredTodos = _.filter(filteredTodos, function(obj){
-            return obj.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+    console.log(where);
+
+    if(where.hasOwnProperty('completed') || where.hasOwnProperty('description')){
+        db.todo.findAll({
+            where : where
+        }).then(function(results){
+            res.json(results);
+        }, function(err){
+            res.json(err);
         });
+    } else{
+        res.status(400).json('Missing object properties to search');
     }
 
-    res.json(filteredTodos);
+    // var filteredTodos = todos;
+
+    // if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
+    //     filteredTodos = _.where(filteredTodos, {completed: true});
+    // } else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
+    //     filteredTodos = _.where(filteredTodos, {completed: false});
+    // }
+
+    // if(queryParams.hasOwnProperty('q') && queryParams.q.trim().length > 0){
+    //     filteredTodos = _.filter(filteredTodos, function(obj){
+    //         return obj.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+    //     });
+    // }
+
+    // res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function(req, res){
