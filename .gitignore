@@ -1,2 +1,4 @@
 node_modules/
 data/*.sqlite
+data/*.sqlited
+data/dev-todo-api.sqlited
