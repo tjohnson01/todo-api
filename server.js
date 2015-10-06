@@ -61,9 +61,13 @@ app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 app.post('/todos',middleware.requireAuthentication, function(req, res) {
     var body = _.pick(req.body, 'description', 'completed');
 
-    db.todo.create(body).then(function(todo) {
-        res.json(todo.toJSON());
-    }, function(e) {
+    db.todo.create(body).then(function(todo){
+        req.user.addTodo(todo).then(function(){
+            return todo.reload();
+        }).then(function(todo){
+            res.json(todo.toJSON());
+        });
+    }, function(e){
         res.status(400).json(e);
     });
 });
@@ -132,6 +136,8 @@ app.post('/users', function (req, res) {
 app.post('/users/login', function (req, res) {
     var body = _.pick(req.body, 'email', 'password');
 
+    // Authenticate user.  if user is authenticated, generate a token based on user ID
+    // and add it to the header.
     db.user.authenticate(body).then(function (user) {
         var token = user.generateToken('authentication');
 

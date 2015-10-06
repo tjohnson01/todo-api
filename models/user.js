@@ -44,6 +44,9 @@ module.exports = function(sequelize, DataTypes) {
             }
         },
         classMethods: {
+            //returns a promise.  find matching email address in database
+            //if valid email, decrypt and authenticate the password
+            //if valid password, resolve and return the user object
             authenticate: function(body) {
                 return new Promise(function(resolve, reject) {
                     if (typeof body.email !== 'string' || typeof body.password !== 'string') {
@@ -65,6 +68,8 @@ module.exports = function(sequelize, DataTypes) {
                     });
                 });
             },
+
+            // Verify that the token passed is valid and that the user ID exists in the db
             findByToken: function(token){
                 return new Promise(function(resolve, reject){
                     try{
@@ -93,6 +98,7 @@ module.exports = function(sequelize, DataTypes) {
                 var json = this.toJSON();
                 return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
             },
+            // Generate a named token based on encrypted user ID
             generateToken: function (type) {
                 if (!_.isString(type)) {
                     return undefined;
